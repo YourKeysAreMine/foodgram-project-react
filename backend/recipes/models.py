@@ -13,6 +13,7 @@ class Recipe(models.Model):
         on_delete=models.PROTECT,
         verbose_name="Автор публикации",
         help_text="Укажите автора",
+        related_name='recipes',
     )
     name = models.CharField(
         verbose_name="Название рецепта",
@@ -31,14 +32,14 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientRecipe",
-        related_name='ingredient_recipe',
+        related_name='recipes',
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты из списка",
     )
     tags = models.ManyToManyField(
         Tag,
         through="TagRecipe",
-        related_name='tag_recipe',
+        related_name='recipes',
         verbose_name="Теги",
         help_text="Выберите теги из списка",
     )

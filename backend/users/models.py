@@ -44,7 +44,7 @@ class User(AbstractUser):
         verbose_name_plural = "Пользователи"
 
 
-class Subscription(models.Model):
+class Follow(models.Model):
     """
     Модель подписки на пользователя
     """
@@ -52,14 +52,14 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name="Подписчик",
-        related_name="subscriber",
+        related_name="follower",
         help_text="Выберите пользователя",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name="Подписка",
-        related_name="subscribtion",
+        related_name="following",
         help_text="Выберите автора",
     )
 
