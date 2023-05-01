@@ -3,7 +3,7 @@ from rest_framework import status, generics, permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .mixins import CreateDestroyViewSet
+from rest_framework import mixins, viewsets
 
 from .models import User, Follow
 from .serializers import (CustomUserSerializer,
@@ -19,7 +19,9 @@ class CustomUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
 
 
-class SubscriptionViewSet(CreateDestroyViewSet):
+class SubscriptionViewSet(mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          viewsets.GenericViewSet):
     """
     APIView для добавления и удаления подписок.
     """

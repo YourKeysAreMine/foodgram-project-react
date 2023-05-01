@@ -5,7 +5,7 @@ from .models import Tag
 
 class TagSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для ингредиентов
+    Сериализатор для отображения списка тегов
     """
     class Meta:
         model = Tag

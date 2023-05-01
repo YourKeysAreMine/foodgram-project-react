@@ -123,6 +123,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для отображения подписок
+    """
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(

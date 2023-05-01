@@ -6,7 +6,7 @@ from .models import Tag
 
 class TagViewSet(ReadOnlyModelViewSet):
     """
-    Вью сет для отображения тегов
+    Вью сет для отображения списка тегов
     """
     queryset = Tag.objects.all()
     permission_classes = (AllowAny, )

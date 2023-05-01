@@ -7,7 +7,7 @@ from rest_framework import filters
 
 class IngredientsViewSet(ReadOnlyModelViewSet):
     """
-    Вью сет для отображения ингредиентов
+    Вью сет для отображения списка ингредиентов
     """
     queryset = Ingredient.objects.all()
     permission_classes = (AllowAny, )
