@@ -13,6 +13,7 @@ from drf_extra_fields.fields import Base64ImageField
 class IngredientAmountSerializer(serializers.ModelSerializer):
     """
     Сериализатор для вывода количества ингредиентов
+    будет применён в сериализаторе для отображения рецептов
     """
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -27,7 +28,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 class RecipeListSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для отображения рецептов
+    Сериализатор для вывода списка рецептов
     """
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
@@ -60,7 +61,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 class AddIngredientSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для добавления Ингредиентов
+    Сериализатор для добавления ингредиентов
+    будет применяться в сериализаторе для добавления рецептов
     """
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField()

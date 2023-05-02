@@ -36,7 +36,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserSerializer(UserSerializer):
     """
-    Сериализатор для получения данных пользователей.
+    Сериализатор для получения списка пользователей.
     """
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
@@ -125,6 +125,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class SubscriptionListSerializer(serializers.ModelSerializer):
     """
     Сериализатор для отображения подписок
+    КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
+    GET /api/users/subscriptions. Postman возвращает 404,
+    "detail": "not found". Помоги пожалуйста, переписывал уже раз пять...
     """
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()

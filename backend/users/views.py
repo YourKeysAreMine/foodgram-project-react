@@ -1,5 +1,5 @@
-from djoser.views import UserViewSet
-from rest_framework import status, generics, permissions
+from rest_framework.viewsets import ModelViewSet
+from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -11,19 +11,21 @@ from .serializers import (CustomUserSerializer,
                           SubscriptionListSerializer)
 
 
-class CustomUserViewSet(UserViewSet):
+class CustomUserViewSet(ModelViewSet):
     """
     Вью сет для вывода списка пользователей
+    По ТЗ просматривать пользователей могут даже анонимы.
     """
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class SubscriptionViewSet(mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
                           viewsets.GenericViewSet):
     """
-    APIView для добавления и удаления подписок.
+    Вью сет для добавления и удаления подписок.
     """
     serializer_class = SubscriptionSerializer
 
@@ -49,7 +51,7 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
         get_object_or_404(User, id=user_id)
         if not Follow.objects.filter(
                 user=request.user, author_id=user_id).exists():
-            return Response({'errors': 'Вы не были подписаны на автора'},
+            return Response({'errors': 'Вы не были подписаны на этого автора'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             Follow,
@@ -59,14 +61,16 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ShowSubscriptionsViewSet(generics.ListAPIView):
+class ShowSubscriptionsViewSet(viewsets.ModelViewSet):
     """
-    APIView для отображения подписок.
+    Вью-сет для отображения подписок.
+    КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
+    GET /api/users/subscriptions. Postman возвращает 404,
+    "detail": "not found". Помоги пожалуйста, переписывал уже раз пять...
     """
-    queryset = User.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
     serializer_class = SubscriptionListSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return User.objects.filter(follower__user=user)
+        return User.objects.filter(following__user=user)

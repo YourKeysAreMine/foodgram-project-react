@@ -20,7 +20,7 @@ urlpatterns = [
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     path(
-            'users/subscriptions/', ShowSubscriptionsViewSet.as_view(),
+            'users/subscriptions/', ShowSubscriptionsViewSet.as_view({'get': 'list'}),
             name='subscriptions'
         ),
 ]
