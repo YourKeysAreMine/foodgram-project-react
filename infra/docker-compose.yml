@@ -3,13 +3,15 @@ services:
 
   db:
     image: postgres:13.0-alpine
+    restart: always
     volumes:
       - db_data:/var/lib/postgresql/data/
     env_file:
       - ../backend/.env
     
   web:
-    image: yourkeysaremine/foodgram_backend
+    # image: yourkeysaremine/foodgram_backend
+    build: ../backend
     restart: always
     volumes:
       - static_value:/app/static/
@@ -20,11 +22,12 @@ services:
       - ../backend/.env
 
   frontend:
-    image: yourkeysaremine/foodgram_frontend
+    # image: yourkeysaremine/foodgram_frontend
+    build: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
-      - web
+      - web # Поиграться с этой настройкой!
 
   nginx:
     image: nginx:1.21.3-alpine
@@ -37,7 +40,7 @@ services:
       - static_value:/var/html/static/
       - media_value:/var/html/media/
     depends_on:
-      - web
+      - web # Поиграться с этой настройкой!
       - frontend
     restart: always
 

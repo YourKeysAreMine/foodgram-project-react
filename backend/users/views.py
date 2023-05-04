@@ -30,7 +30,8 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
     serializer_class = SubscriptionSerializer
 
     def get_queryset(self):
-        return self.request.user.following.all()
+        user = self.request.user
+        return User.objects.filter(following__user=user)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -65,8 +66,13 @@ class ShowSubscriptionsViewSet(viewsets.ModelViewSet):
     """
     Вью-сет для отображения подписок.
     КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
-    GET /api/users/subscriptions. Postman возвращает 404,
+    GET /api/users/subscriptions. Postman возвращает 404, без дебаг сообщений, просто
     "detail": "not found". Помоги пожалуйста, переписывал уже раз пять...
+    Причём, что интересно, при подписке по эндпоинту
+    POST /api/users/user_id/sibscribe. Postman возвращает ответ согласно ТЗ.
+    То есть ошибки во вью-сете быть не может, так как вью сет выше для ПОСТ запросов
+    для добавления подписок я писал максимально идентичным.
+    Я даже через APIView пробовал, ничего не выходит...
     """
     serializer_class = SubscriptionListSerializer
     permission_classes = [permissions.IsAuthenticated]

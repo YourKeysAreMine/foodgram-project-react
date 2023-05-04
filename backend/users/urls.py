@@ -14,13 +14,18 @@ router_v1.register(
 router_v1.register(
     r'users/(?P<user_id>\d+)/subscribe', SubscriptionViewSet,
     basename='subscribe')
+router_v1.register(
+    r'users/subscriptions', ShowSubscriptionsViewSet,
+    basename='subscribtions')
 
 urlpatterns = [
     path('', include(router_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path(
-            'users/subscriptions/', ShowSubscriptionsViewSet.as_view({'get': 'list'}),
-            name='subscriptions'
-        ),
+    # Возвращаясь к проблеме с эндпоинтом GET /api/users/subscriptions, здесь
+    # Я попытался зарегистрировать эндпоинт таким образом, ошибка та же самая...
+    # path(
+            # 'users/subscriptions/', ShowSubscriptionsViewSet.as_view({'get': 'list'}),
+            # name='subscriptions'
+        # ),
 ]

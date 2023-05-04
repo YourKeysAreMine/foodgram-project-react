@@ -20,6 +20,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://*.127.0.0.1',
+    'http://*localhost',
+    'https://*localhost',
+    ]
+
 
 # Application definition
 
@@ -127,7 +133,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.user'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
