@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from djoser.views import UserViewSet
 from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -11,7 +12,7 @@ from .serializers import (CustomUserSerializer,
                           SubscriptionListSerializer)
 
 
-class CustomUserViewSet(ModelViewSet):
+class CustomUserViewSet(UserViewSet):
     """
     Вью сет для вывода списка пользователей
     По ТЗ просматривать пользователей могут даже анонимы.
@@ -75,8 +76,6 @@ class ShowSubscriptionsViewSet(viewsets.ModelViewSet):
     Я даже через APIView пробовал, ничего не выходит...
     """
     serializer_class = SubscriptionListSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return User.objects.filter(following__user=user)
+        return User.objects.filter(follower__user=self.request.user)

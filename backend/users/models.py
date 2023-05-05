@@ -6,11 +6,6 @@ class User(AbstractUser):
     """
     Модель пользователя
     """
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email",
-                       "first_name",
-                       "last_name",
-                       "password"]
     username = models.CharField(
         verbose_name="Имя пользователя",
         max_length=150,
