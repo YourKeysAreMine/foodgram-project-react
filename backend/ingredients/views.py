@@ -1,8 +1,9 @@
-from .serializers import IngredientSerializer
+from rest_framework import filters
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ReadOnlyModelViewSet
+
 from .models import Ingredient
-from rest_framework import filters
+from .serializers import IngredientSerializer
 
 
 class IngredientsViewSet(ReadOnlyModelViewSet):

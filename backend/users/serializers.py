@@ -1,8 +1,8 @@
-from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
-
-from .models import User, Follow
 from recipes.models import Recipe
+from rest_framework import serializers
+
+from .models import Follow, User
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -108,12 +108,13 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
     """
     Вью-сет для отображения подписок.
     КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
-    GET /api/users/subscriptions. Postman возвращает 404, без дебаг сообщений, просто
-    "detail": "not found". Помоги пожалуйста, переписывал уже раз пять...
+    GET /api/users/subscriptions. Postman возвращает 404, без дебаг сообщений,
+    просто "detail": "not found". Помоги пожалуйста, переписывал уже раз пять.
     Причём, что интересно, при подписке по эндпоинту
     POST /api/users/user_id/sibscribe. Postman возвращает ответ согласно ТЗ.
     То есть ошибки в сериализаторе быть не может, так как сериализатор выше,
-    специально для ПОСТ запросов для добавления подписок, который я писал заново - работает.
+    специально для ПОСТ запросов для добавления подписок, который
+    я писал заново - работает.
     """
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()

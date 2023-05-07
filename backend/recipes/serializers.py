@@ -1,16 +1,15 @@
-from .models import (Recipe,
-                     FavoriteRecipe,
-                     ShoppingCartRecipe,
-                     IngredientRecipe)
-from rest_framework import serializers
-from tags.serializers import TagSerializer
-from users.serializers import CustomUserSerializer
-from ingredients.models import Ingredient
-from tags.models import Tag
-from drf_extra_fields.fields import Base64ImageField
-from users.models import Follow, User
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
+from ingredients.models import Ingredient
+from rest_framework import serializers
+from tags.models import Tag
+from tags.serializers import TagSerializer
+from users.models import Follow, User
+from users.serializers import CustomUserSerializer
+
+from .models import (FavoriteRecipe, IngredientRecipe, Recipe,
+                     ShoppingCartRecipe)
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
@@ -47,7 +46,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return FavoriteRecipe.objects.filter(user=user.id, recipe=obj.id).exists()
+        return FavoriteRecipe.objects.filter(
+            user=user.id, recipe=obj.id).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
@@ -135,7 +135,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
         if not ingredients:
-            raise serializers.ValidationError('Выберите хотя бы один ингредиент')
+            raise serializers.ValidationError(
+                'Выберите хотя бы один ингредиент')
         elif not tags:
             raise serializers.ValidationError('Выберите хотя бы один тег')
         recipe = Recipe.objects.create(**validated_data)
@@ -205,60 +206,6 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для списка избранного
-    """
-    class Meta:
-        model = FavoriteRecipe
-        fields = ('user', 'recipe')
-
-    def validate(self, data):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        recipe = data['recipe']
-        if FavoriteRecipe.objects.filter(
-                user=request.user, recipe=recipe).exists():
-            raise serializers.ValidationError({
-                'status': 'Рецепт уже есть в избранном!'
-            })
-        return data
-
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return ShortRecipeSerializer(
-            instance.recipe, context=context).data
-
-
-class ShoppingCartSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для списка покупок
-    """
-    class Meta:
-        model = ShoppingCartRecipe
-        fields = ('user', 'recipe')
-
-    def validate(self, data):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        recipe = data['recipe']
-        if ShoppingCartRecipe.objects.filter(
-                user=request.user, recipe=recipe).exists():
-            raise serializers.ValidationError({
-                'status': 'Рецепт уже есть в корзине!'
-            })
-        return data
-
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return ShortRecipeSerializer(
-            instance.recipe, context=context).data
 
 
 class FollowRecipeSerializer(serializers.ModelSerializer):
