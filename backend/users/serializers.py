@@ -89,7 +89,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return data
 
     def get_recipes(self, obj):
-        recipes = obj.author.recipes.all()
+        author = self.context.get('author_id')
+        recipes = Recipe.objects.filter(author=author)
         return RecipeSerializerForFollow(
             recipes,
             many=True).data
@@ -106,7 +107,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 class SubscriptionListSerializer(serializers.ModelSerializer):
     """
-    Вью-сет для отображения подписок.
+    Сериализатор для отображения подписок.
     КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
     GET /api/users/subscriptions. Postman возвращает 404, без дебаг сообщений,
     просто "detail": "not found". Помоги пожалуйста, переписывал уже раз пять.
@@ -132,7 +133,8 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
         return False
 
     def get_recipes(self, obj):
-        recipes = obj.author.recipes.all()
+        author = self.context.get('author_id')
+        recipes = Recipe.objects.filter(author=author)
         return RecipeSerializerForFollow(
             recipes,
             many=True).data
