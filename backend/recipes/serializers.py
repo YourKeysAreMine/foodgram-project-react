@@ -199,16 +199,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
+class FollowRecipeSerializer(serializers.ModelSerializer):
     """
     Сериализатор для краткого отображения сведений о рецепте
     """
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-
-class FollowRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
