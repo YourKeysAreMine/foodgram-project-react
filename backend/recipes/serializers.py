@@ -181,7 +181,8 @@ class RecipeSerializer(serializers.ModelSerializer):
                     Ingredient, id=ingredient['id']
                 )
                 if ingredient_obj in checked_ingredients:
-                    raise serializers.ValidationError('дубликат ингредиента')
+                    raise serializers.ValidationError(
+                        'Выбирете другой ингредиент')
                 checked_ingredients.add(ingredient_obj)
         return data
 

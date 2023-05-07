@@ -1,8 +1,11 @@
+from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from recipes.models import Recipe
 from rest_framework import serializers
 
 from .models import Follow, User
+
+User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -111,6 +114,7 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
     КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
     GET /api/users/subscriptions. Postman возвращает 404, без дебаг сообщений,
     просто "detail": "not found". Помоги пожалуйста, переписывал уже раз пять.
+    Создавал два треда, именно по этому вопросу никто не помог...
     Причём, что интересно, при подписке по эндпоинту
     POST /api/users/user_id/sibscribe. Postman возвращает ответ согласно ТЗ.
     То есть ошибки в сериализаторе быть не может, так как сериализатор выше,
@@ -119,18 +123,24 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
     """
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.IntegerField(
-        source='author.recipes.count', read_only=True
-    )
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'recipes', 'recipes_count')
+        read_only_fields = ('email', 'username', 'first_name', 'last_name',
+                            'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
-        subscribe = Follow.objects.filter(
-            user=self.context.get('request').user,
-            author=obj.author
-        )
-        if subscribe:
-            return True
-        return False
+        user = self.context.get('request').user
+        if user.is_anonymous or (user == obj):
+            return False
+
+        return user.follower.filter(author=obj).exists()
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
 
     def get_recipes(self, obj):
         author = self.context.get('author_id')
@@ -138,16 +148,3 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
         return RecipeSerializerForFollow(
             recipes,
             many=True).data
-
-    class Meta:
-        model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count'
-        )

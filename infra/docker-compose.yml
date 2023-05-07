@@ -10,8 +10,7 @@ services:
       - ./.env
     
   web:
-    # image: yourkeysaremine/foodgram_backend
-    build: ../backend
+    image: yourkeysaremine/foodgram_backend
     restart: always
     volumes:
       - static_value:/app/static/
@@ -22,12 +21,9 @@ services:
       - ./.env
 
   frontend:
-    # image: yourkeysaremine/foodgram_frontend
-    build: ../frontend
+    image: yourkeysaremine/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
-    # depends_on:
-      # - web # Поиграться с этой настройкой!
 
   nginx:
     image: nginx:1.21.3-alpine
@@ -41,7 +37,6 @@ services:
       - media_value:/var/html/media/
     restart: always
     depends_on:
-      # - web # Поиграться с этой настройкой!
       - frontend
 
 volumes:
