@@ -17,8 +17,8 @@ from .serializers import FollowRecipeSerializer, RecipeSerializer
 
 class RecipeViewSet(ModelViewSet):
     """
-    ViewSet для работы с рецептами.
-    Для анонимов разрешен только просмотр рецептов.
+    Вью сет для вывода списка рецептов, корзины, избранного
+    Также позволяет скачивать корзину в формате .txt
     """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
@@ -47,7 +47,7 @@ class RecipeViewSet(ModelViewSet):
         if recipe.exists():
             recipe.delete()
             return Response(
-                {'msg': 'Успешно удалено'},
+                {'msg': 'Удалено успешно'},
                 status=status.HTTP_204_NO_CONTENT
             )
         return Response(
@@ -62,8 +62,8 @@ class RecipeViewSet(ModelViewSet):
     )
     def favorite(self, request, pk):
         return self.__favorite_shopping(request, pk, FavoriteRecipe, {
-            'recipe_in': 'Рецепт уже в избранном',
-            'recipe_not_in': 'Рецепта нет в избранном'
+            'recipe_in': 'Рецепт уже добавлен в избранное',
+            'recipe_not_in': 'Рецепт не добавлен в избранное'
         })
 
     @action(
@@ -73,8 +73,8 @@ class RecipeViewSet(ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         return self.__favorite_shopping(request, pk, ShoppingCartRecipe, {
-            'recipe_in': 'Рецепт уже в списке покупок',
-            'recipe_not_in': 'Рецепта нет в спике покупок'
+            'recipe_in': 'Рецепт уже добавлен в список покупок',
+            'recipe_not_in': 'Рецепта не добавлен в список покупок'
         })
 
     @action(
@@ -83,7 +83,6 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthenticated, ]
     )
     def download_shopping_cart(self, request):
-        """Отправка файла со списком покупок."""
         ingredients = IngredientRecipe.objects.filter(
             recipe__carts__user=request.user
         ).values(
