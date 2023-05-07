@@ -22,9 +22,9 @@ urlpatterns = [
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     # Возвращаясь к проблеме с эндпоинтом GET /api/users/subscriptions, здесь
-    # Я попытался зарегистрировать эндпоинт таким образом, ошибка та же самая...
+    # Я попытался зарегистрировать эндпоинт таким образом, ошибка та же самая.
     # path(
-            # 'users/subscriptions/', ShowSubscriptionsViewSet.as_view({'get': 'list'}),
-            # name='subscriptions'
-        # ),
+    # 'users/subscriptions/', ShowSubscriptionsViewSet.as_view({'get': 'list'}
+    # name='subscriptions'
+    # ),
 ]
