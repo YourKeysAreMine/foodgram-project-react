@@ -9,6 +9,9 @@ class TagViewSet(ReadOnlyModelViewSet):
     """
     Вью сет для отображения списка тегов
     """
-    queryset = Tag.objects.all()
-    permission_classes = (AllowAny, )
     serializer_class = TagSerializer
+    pagination_class = None
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return Tag.objects.all()

@@ -6,9 +6,6 @@ class Tag(models.Model):
     """
     Модель тега
     """
-    REQUIRED_FIELDS = ["name",
-                       "color",
-                       "slug"]
     name = models.CharField(
         verbose_name="Название",
         unique=True,

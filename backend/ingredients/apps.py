@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class IngredientsConfig(AppConfig):
-    name = 'ingredients'
+    verbose_name = "Ингредиенты"
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "ingredients"

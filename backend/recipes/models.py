@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from ingredients.models import Ingredient
 from tags.models import Tag
 from users.models import User
@@ -8,12 +9,16 @@ class Recipe(models.Model):
     """
     Модель рецептов
     """
+    created = models.DateTimeField(
+        "Дата создания",
+        auto_now_add=True,
+        help_text="Текущая дата и время устанавливается автоматически",
+    )
     author = models.ForeignKey(
         User,
-        on_delete=models.PROTECT,
+        on_delete=models.RESTRICT,
         verbose_name="Автор публикации",
         help_text="Укажите автора",
-        related_name='recipes',
     )
     name = models.CharField(
         verbose_name="Название рецепта",
@@ -32,25 +37,27 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientRecipe",
-        related_name='recipes',
         verbose_name="Ингредиенты",
         help_text="Выберите ингредиенты из списка",
     )
     tags = models.ManyToManyField(
         Tag,
         through="TagRecipe",
-        related_name='recipes',
         verbose_name="Теги",
         help_text="Выберите теги из списка",
     )
     cooking_time = models.IntegerField(
         verbose_name="Время приготовления в минутах",
         help_text="Введите время приготовления в минутах",
+        validators=[
+            MinValueValidator(1, message="Укажите число больше либо равное 1"),
+        ],
     )
 
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
+        ordering = ("-created",)
 
     def __str__(self):
         return f"{str(self.name)} {str(self.author)}"
