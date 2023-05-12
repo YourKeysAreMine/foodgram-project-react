@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Recipe
 from rest_framework import serializers
 
@@ -46,6 +47,10 @@ class RecipeSerializerForFollow(serializers.ModelSerializer):
     """
     Сериализатор для отображения рецептов в подписках
     """
+    image = Base64ImageField(read_only=True)
+    name = serializers.ReadOnlyField()
+    cooking_time = serializers.ReadOnlyField()
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -99,13 +104,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             many=True).data
 
     def get_is_subscribed(self, obj):
-        subscribe = Follow.objects.filter(
+        return Follow.objects.filter(
             user=self.context.get('request').user,
             author=obj.author
-        )
-        if subscribe:
-            return True
-        return False
+        ).exists
 
 
 class SubscriptionListSerializer(serializers.ModelSerializer):
@@ -130,21 +132,23 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
-        read_only_fields = ('email', 'username', 'first_name', 'last_name',
-                            'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Follow.objects.filter(user=user, author=obj.id).exists()
+        return (
+            self.context.get('request').user.is_authenticated
+            and Follow.objects.filter(user=self.context['request'].user,
+                                      author=obj).exists()
+        )
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
     def get_recipes(self, obj):
-        author = self.context.get('author_id')
-        recipes = Recipe.objects.filter(author=author)
-        return RecipeSerializerForFollow(
-            recipes,
-            many=True).data
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = obj.recipes.all()
+        if limit:
+            recipes = recipes[:int(limit)]
+        serializer = RecipeSerializerForFollow(recipes, many=True,
+                                               read_only=True)
+        return serializer.data

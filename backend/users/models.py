@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .validators import validate_name
+
 
 class User(AbstractUser):
     """
@@ -16,7 +18,8 @@ class User(AbstractUser):
         help_text=(
             "Введите имя пользователя."
             "Максимальная длина имени пользователя 150 символов."
-        )
+        ),
+        validators=[validate_name]
     )
     email = models.EmailField(
         verbose_name="Электронная почта",

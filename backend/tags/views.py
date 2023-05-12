@@ -12,6 +12,4 @@ class TagViewSet(ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     pagination_class = None
     permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        return Tag.objects.all()
+    queryset = Tag.objects.all()

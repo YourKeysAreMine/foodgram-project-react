@@ -115,6 +115,12 @@ class TagRecipe(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_tag_recipe",
+                fields=["tag", "recipe"],
+            ),
+        ]
         verbose_name = "Тег: Рецепт"
         verbose_name_plural = "Теги: Рецепты"
 

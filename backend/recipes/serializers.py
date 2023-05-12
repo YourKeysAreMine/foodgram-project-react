@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from ingredients.models import Ingredient
 from rest_framework import serializers
@@ -33,14 +32,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
     Сериализатор для вывода списка рецептов
     """
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientAmountSerializer(many=True)
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-
-    def get_ingredients(self, obj):
-        queryset = IngredientRecipe.objects.filter(recipe=obj)
-        return IngredientAmountSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -130,27 +125,35 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         return serializer.data
 
-    @transaction.atomic
-    def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients', None)
-        tags = validated_data.pop('tags', None)
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Выберите хотя бы один ингредиент')
-        elif not tags:
-            raise serializers.ValidationError('Выберите хотя бы один тег')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
+    def ingredient_list_create(self, instance, ingredients):
         ingredients_list = [
             IngredientRecipe(
-                recipe=recipe,
+                recipe=instance,
                 ingredient=ingredient.get('id'),
                 amount=ingredient.get('amount')
             )
             for ingredient in ingredients
         ]
         IngredientRecipe.objects.bulk_create(ingredients_list)
-        return recipe
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients', None)
+        tags = validated_data.pop('tags', None)
+        instance = Recipe.objects.create(**validated_data)
+        instance.tags.set(tags)
+        self.ingredient_list_create(instance, ingredients)
+        return instance
+
+    def validate(self, data):
+        ingredients = data.get('ingredients', None)
+        tags = data.get('tags', None)
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Выберите хотя бы один ингредиент')
+        elif not tags:
+            raise serializers.ValidationError('Выберите хотя бы один тег')
+        return data
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -161,15 +164,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.tags.set(tags)
         if ingredients:
             instance.ingredients.clear()
-            ingredients_list = [
-                IngredientRecipe(
-                    recipe=instance,
-                    ingredient=ingredient.get('id'),
-                    amount=ingredient.get('amount')
-                )
-                for ingredient in ingredients
-            ]
-            IngredientRecipe.objects.bulk_create(ingredients_list)
+            self.ingredient_list_create(instance, ingredients)
         return instance
 
     def validate(self, data):
@@ -177,13 +172,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         if ingredient_data:
             checked_ingredients = set()
             for ingredient in ingredient_data:
-                ingredient_obj = get_object_or_404(
-                    Ingredient, id=ingredient['id']
-                )
-                if ingredient_obj in checked_ingredients:
+                if ingredient in checked_ingredients:
                     raise serializers.ValidationError(
                         'Выбирете другой ингредиент')
-                checked_ingredients.add(ingredient_obj)
+                checked_ingredients.add(ingredient)
         return data
 
     class Meta:

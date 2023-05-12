@@ -60,7 +60,10 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ShowSubscriptionsViewSet(viewsets.ModelViewSet):
+class ShowSubscriptionsViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               viewsets.GenericViewSet):
     """
     Вью-сет для отображения подписок.
     КОММЕНТАРИЙ ДЛЯ РЕВЬЮЕРА! Привет, ни в какую не получается сделать
@@ -76,5 +79,11 @@ class ShowSubscriptionsViewSet(viewsets.ModelViewSet):
     """
     serializer_class = SubscriptionListSerializer
 
-    def get_queryset(self):
-        return User.objects.filter(follower__user=self.request.user)
+    @action(detail=False, methods=['get'],
+            permission_classes=(permissions.IsAuthenticated,))
+    def subscriptions(self, request):
+        queryset = User.objects.filter(subscribing__user=request.user)
+        page = self.paginate_queryset(queryset)
+        serializer = SubscriptionListSerializer(page, many=True,
+                                                context={'request': request})
+        return self.get_paginated_response(serializer.data)
