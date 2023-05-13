@@ -1,8 +1,5 @@
 from django_filters.rest_framework import FilterSet, filters
-# Привет, спасибо за ревью! Использовал isort ., но он ругается
-# на пробелы между импортами и их исправляет... Ошибка I004
-# Пробел добавил, ошибку I004 внёс в исключения setup.cfg чтобы
-# Проходили тесты worflow в github...
+
 from ingredients.models import Ingredient
 from tags.models import Tag
 

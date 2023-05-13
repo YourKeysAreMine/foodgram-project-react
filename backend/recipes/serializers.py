@@ -1,8 +1,9 @@
 from django.db import transaction
-from django.shortcuts import get_object_or_404
+
 from drf_extra_fields.fields import Base64ImageField
-from ingredients.models import Ingredient
 from rest_framework import serializers
+
+from ingredients.models import Ingredient
 from tags.models import Tag
 from tags.serializers import TagSerializer
 from users.models import Follow, User
@@ -33,20 +34,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
     Сериализатор для вывода списка рецептов
     """
     author = CustomUserSerializer(read_only=True)
-    # Потестил с внутренним сериализатором, к сожалению, когда
-    # я использую IngredientAmountSerializer(many=True) появляется
-    # ошибка: AttributeError: Got AttributeError when attempting
-    # to get a value for field `amount` on serializer
-    # `IngredientAmountSerializer`. Original exception text was:
-    # 'Ingredient' object has no attribute 'amount'.
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientAmountSerializer(many=True,
+                                             source='ingredientrecipes')
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-
-    def get_ingredients(self, obj):
-        queryset = IngredientRecipe.objects.filter(recipe=obj)
-        return IngredientAmountSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -155,26 +147,11 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Выберите хотя бы один ингредиент')
         elif not tags:
             raise serializers.ValidationError('Выберите хотя бы один тег')
-        # Спасибо за ревью, к сожалению, когда я initial_data меняю
-        # на data, появляется следующая ошибка: AssertionError: When a
-        # serializer is passed a `data` keyword argument you must call
-        # `.is_valid()` before attempting to access the serialized
-        # `.data` representation. You should either call `.is_valid()`
-        #  first, or access `.initial_data` instead.
-        ingredient_data = self.initial_data.get('ingredients')
-        if ingredient_data:
-            checked_ingredients = set()
-            for ingredient in ingredient_data:
-                # К сожалению, когда я убираю дополнительную выборку ниже
-                # и обращаюсь просто к ingredient
-                # Возникает ошибка: TypeError: unhashable type: 'dict'
-                ingredient_obj = get_object_or_404(
-                    Ingredient, id=ingredient['id']
-                )
-                if ingredient_obj in checked_ingredients:
-                    raise serializers.ValidationError(
-                        'Выбирете другой ингредиент')
-                checked_ingredients.add(ingredient_obj)
+        ingredient_list = []
+        for ingredient in ingredients:
+            ingredient_list.append(ingredient.get('id'))
+        if len(set(ingredient_list)) != len(ingredient_list):
+            raise serializers.ValidationError('Выбирете другой ингредиент')
         return data
 
     @transaction.atomic

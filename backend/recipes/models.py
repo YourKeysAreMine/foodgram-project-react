@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from ingredients.models import Ingredient
 from tags.models import Tag
 from users.models import User
@@ -70,13 +71,13 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name="ingredient",
+        related_name="ingredientrecipes",
         verbose_name="Ингредиент",
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="recipe_ingredient",
+        related_name="ingredientrecipes",
         verbose_name="Рецепт",
     )
     amount = models.IntegerField(
