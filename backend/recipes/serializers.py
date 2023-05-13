@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from ingredients.models import Ingredient
 from rest_framework import serializers
@@ -32,10 +33,20 @@ class RecipeListSerializer(serializers.ModelSerializer):
     Сериализатор для вывода списка рецептов
     """
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientAmountSerializer(many=True)
+    # Потестил с внутренним сериализатором, к сожалению, когда
+    # я использую IngredientAmountSerializer(many=True) появляется
+    # ошибка: AttributeError: Got AttributeError when attempting
+    # to get a value for field `amount` on serializer
+    # `IngredientAmountSerializer`. Original exception text was:
+    # 'Ingredient' object has no attribute 'amount'.
+    ingredients = serializers.SerializerMethodField()
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+
+    def get_ingredients(self, obj):
+        queryset = IngredientRecipe.objects.filter(recipe=obj)
+        return IngredientAmountSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user
@@ -107,7 +118,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для добавления рецептов
+    Сериализатор для добавления и изменения рецептов
     """
     author = AuthorSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
@@ -134,16 +145,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
             for ingredient in ingredients
         ]
-        IngredientRecipe.objects.bulk_create(ingredients_list)
-
-    @transaction.atomic
-    def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients', None)
-        tags = validated_data.pop('tags', None)
-        instance = Recipe.objects.create(**validated_data)
-        instance.tags.set(tags)
-        self.ingredient_list_create(instance, ingredients)
-        return instance
+        return IngredientRecipe.objects.bulk_create(ingredients_list)
 
     def validate(self, data):
         ingredients = data.get('ingredients', None)
@@ -153,7 +155,36 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Выберите хотя бы один ингредиент')
         elif not tags:
             raise serializers.ValidationError('Выберите хотя бы один тег')
+        # Спасибо за ревью, к сожалению, когда я initial_data меняю
+        # на data, появляется следующая ошибка: AssertionError: When a
+        # serializer is passed a `data` keyword argument you must call
+        # `.is_valid()` before attempting to access the serialized
+        # `.data` representation. You should either call `.is_valid()`
+        #  first, or access `.initial_data` instead.
+        ingredient_data = self.initial_data.get('ingredients')
+        if ingredient_data:
+            checked_ingredients = set()
+            for ingredient in ingredient_data:
+                # К сожалению, когда я убираю дополнительную выборку ниже
+                # и обращаюсь просто к ingredient
+                # Возникает ошибка: TypeError: unhashable type: 'dict'
+                ingredient_obj = get_object_or_404(
+                    Ingredient, id=ingredient['id']
+                )
+                if ingredient_obj in checked_ingredients:
+                    raise serializers.ValidationError(
+                        'Выбирете другой ингредиент')
+                checked_ingredients.add(ingredient_obj)
         return data
+
+    @transaction.atomic
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients', None)
+        tags = validated_data.pop('tags', None)
+        instance = Recipe.objects.create(**validated_data)
+        instance.tags.set(tags)
+        self.ingredient_list_create(instance, ingredients)
+        return instance
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -166,17 +197,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.ingredients.clear()
             self.ingredient_list_create(instance, ingredients)
         return instance
-
-    def validate(self, data):
-        ingredient_data = self.initial_data.get('ingredients')
-        if ingredient_data:
-            checked_ingredients = set()
-            for ingredient in ingredient_data:
-                if ingredient in checked_ingredients:
-                    raise serializers.ValidationError(
-                        'Выбирете другой ингредиент')
-                checked_ingredients.add(ingredient)
-        return data
 
     class Meta:
         model = Recipe
