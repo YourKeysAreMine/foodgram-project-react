@@ -1,5 +1,4 @@
 from django.db import transaction
-
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
@@ -140,8 +139,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         return IngredientRecipe.objects.bulk_create(ingredients_list)
 
     def validate(self, data):
-        ingredients = data.get('ingredients', None)
-        tags = data.get('tags', None)
+        ingredients = data.get('ingredients')
+        tags = data.get('tags')
         if not ingredients:
             raise serializers.ValidationError(
                 'Выберите хотя бы один ингредиент')
