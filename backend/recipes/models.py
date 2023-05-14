@@ -20,6 +20,7 @@ class Recipe(models.Model):
         on_delete=models.RESTRICT,
         verbose_name="Автор публикации",
         help_text="Укажите автора",
+        related_name='recipes',
     )
     name = models.CharField(
         verbose_name="Название рецепта",
