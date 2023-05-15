@@ -12,4 +12,4 @@ class Command(BaseCommand):
             json_data = json.loads(data_file.read())
             for ingredient_data in json_data:
                 Ingredient.objects.get_or_create(**ingredient_data)
-        print('Импорт ингредиентов завершён!')
+        print('Импорт ингредиентов успешно завершён!')
