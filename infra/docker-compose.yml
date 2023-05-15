@@ -10,8 +10,8 @@ services:
       - ./.env
     
   web:
-    # image: yourkeysaremine/foodgram_backend
-    build: ../backend
+    # build: ../backend
+    image: yourkeysaremine/foodgram_backend
     restart: always
     volumes:
       - static_value:/app/static/
@@ -22,8 +22,8 @@ services:
       - ./.env
 
   frontend:
-    # image: yourkeysaremine/foodgram_frontend
-    build: ../frontend
+    # build: ../frontend
+    image: yourkeysaremine/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
 
