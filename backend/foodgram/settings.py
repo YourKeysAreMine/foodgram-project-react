@@ -10,14 +10,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'http://*.127.0.0.1',
     'http://*localhost',
-    'https://*localhost', ]
+    'https://*localhost',
+    'http://158.160.50.17', ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
