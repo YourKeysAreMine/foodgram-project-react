@@ -44,7 +44,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -60,6 +60,7 @@ jobs:
           script: |
             sudo docker-compose stop
             sudo docker-compose rm web -f
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
@@ -70,6 +71,7 @@ jobs:
             sudo docker-compose up -d --build
             sudo docker-compose exec web python manage.py migrate
             sudo docker-compose exec web python manage.py collectstatic --no-input
+            sudo docker-compose exec web python manage.py import_ingredients_csv
 
   send_message:
     runs-on: ubuntu-latest
