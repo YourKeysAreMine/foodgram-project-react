@@ -83,12 +83,13 @@ docker-compose exec web python manage.py collectstatic --noinput
 ```
 
 ## Сайт
-Сайт доступен по ссылке:
-[]()
+Сайт доступен по ссылке: 
+[http://158.160.50.17/signin](http://158.160.50.17/signin)
 
-## Документация к API
-API документация доступна по ссылке (создана с помощью redoc):
-[]()
+## Логин и пароль суперпользователя
+Логин(электронная почта):1@mail.ru
+
+Пароль:1
 
 ![example workflow](https://github.com/YourKeysAreMine/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
