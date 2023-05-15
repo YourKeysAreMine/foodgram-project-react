@@ -7,7 +7,6 @@ from tags.models import Tag
 from tags.serializers import TagSerializer
 from users.models import Follow, User
 from users.serializers import CustomUserSerializer
-
 from .models import (FavoriteRecipe, IngredientRecipe, Recipe,
                      ShoppingCartRecipe)
 
