@@ -148,6 +148,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredient_list = []
         for ingredient in ingredients:
             ingredient_list.append(ingredient.get('id'))
+            amount = ingredient['amount']
+            if int(amount) <= 0:
+                raise serializers.ValidationError({
+                    'amount': 'Количество ингредиентов не может быть меньше 1'
+                })
         if len(set(ingredient_list)) != len(ingredient_list):
             raise serializers.ValidationError('Выбирете другой ингредиент')
         return data
