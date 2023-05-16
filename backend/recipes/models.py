@@ -81,7 +81,7 @@ class IngredientRecipe(models.Model):
         related_name="ingredientrecipes",
         verbose_name="Рецепт",
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name="Количество ингредиента",
         validators=[
             MinValueValidator(
